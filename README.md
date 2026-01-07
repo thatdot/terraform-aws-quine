@@ -1,83 +1,358 @@
-# thatDot ECS Terraform Infrastructure
+# Terraform AWS thatDot Module
 
-This Terraform project provisions an AWS ECS (Elastic Container Service) infrastructure with the following components:
+[![Terraform Registry](https://img.shields.io/badge/terraform-registry-blue.svg)](https://registry.terraform.io/modules/thatdot/thatdot/aws)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-- ECS Cluster running on Fargate (serverless)
-- ECS Service running thatDot Quine
-- Application Load Balancer (ALB)
-- Security Groups for ALB and ECS tasks
-- IAM roles for ECS task execution and container permissions
-- CloudWatch Logs for container logging
+Terraform module to deploy [Quine](https://quine.io/) streaming graph on AWS ECS Fargate with an Application Load Balancer.
 
-## Prerequisites
+## Features
 
-1. AWS CLI installed and configured with credentials
-2. Terraform installed (>= 1.0)
-3. AWS account with appropriate permissions
+- **ECS Fargate** - Serverless container orchestration (no EC2 instances to manage)
+- **Application Load Balancer** - HTTP/HTTPS traffic distribution with health checks
+- **Auto-discovery** - Automatically uses default VPC if none specified
+- **HTTPS Support** - Optional TLS termination with ACM certificates
+- **CloudWatch Integration** - Container logs with configurable retention
+- **Container Insights** - Optional detailed container metrics
+- **IAM Least Privilege** - Separate execution and task roles with minimal permissions
+- **Secrets Management** - Native integration with AWS Secrets Manager and SSM Parameter Store
+- **Production Ready** - Deployment circuit breaker, deletion protection, and proper tagging
 
-## Project Structure
+## Architecture
 
 ```
-.
-├── terraform.tf              # Provider and version configuration
-├── variables.tf              # Input variable definitions
-├── terraform.tfvars.example  # Example variable values
-├── iam.tf             # IAM roles and policies
-├── security_groups.tf # Security groups for ALB and ECS
-├── alb.tf             # Application Load Balancer resources
-├── ecs.tf             # ECS cluster, task definition, and service
-├── outputs.tf         # Output values
-└── README.md          # This file
+                    Internet
+                        |
+                        v
+              +-------------------+
+              |        ALB        |
+              | (Security Group)  |
+              +-------------------+
+                        |
+                        v
+              +-------------------+
+              |    ECS Service    |
+              | (Security Group)  |
+              |                   |
+              |  +-------------+  |
+              |  | Quine Task  |  |
+              |  +-------------+  |
+              +-------------------+
+                        |
+                        v
+              +-------------------+
+              | CloudWatch Logs   |
+              +-------------------+
 ```
 
-## Deployment
+## Quick Start
 
-### 1. Initialize Terraform
+### Minimal Configuration
 
-```bash
-terraform init
+```hcl
+module "quine" {
+  source  = "thatdot/thatdot/aws"
+  version = "1.0.0"
+
+  project_name = "my-quine"
+}
+
+output "url" {
+  value = module.quine.alb_url
+}
 ```
 
-### 2. Review the Plan
+### Production Configuration
 
-```bash
-terraform plan
+```hcl
+module "quine" {
+  source  = "thatdot/thatdot/aws"
+  version = "1.0.0"
+
+  project_name = "quine-prod"
+  environment  = "prod"
+
+  # Custom VPC
+  vpc_id     = "vpc-0123456789abcdef0"
+  subnet_ids = ["subnet-111", "subnet-222"]
+
+  # Container sizing
+  container_cpu    = 4096
+  container_memory = 8192
+  desired_count    = 2
+
+  # HTTPS
+  enable_https    = true
+  certificate_arn = "arn:aws:acm:us-west-2:123456789012:certificate/..."
+
+  # Production settings
+  enable_deletion_protection = true
+  log_retention_days         = 30
+
+  tags = {
+    Team = "platform"
+  }
+}
 ```
 
-### 3. Apply the Configuration
+## Requirements
 
-```bash
-terraform apply
+| Name | Version |
+|------|---------|
+| terraform | >= 1.5.0 |
+| aws | >= 5.0, < 6.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | >= 5.0 |
+
+## Usage
+
+See the [examples](./examples/) directory for complete usage examples:
+
+- [Basic](./examples/basic/) - Minimal configuration using defaults
+- [Complete](./examples/complete/) - Production setup with all options
+
+## Inputs
+
+### Required
+
+| Name | Description | Type |
+|------|-------------|------|
+| `project_name` | Project name for resource naming (3-32 chars, alphanumeric with hyphens) | `string` |
+
+### Environment
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `environment` | Environment name (2-16 lowercase letters) | `string` | `"dev"` |
+| `tags` | Additional tags for all resources | `map(string)` | `{}` |
+
+### Network
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `vpc_id` | VPC ID (uses default VPC if null) | `string` | `null` |
+| `subnet_ids` | Subnet IDs (min 2, uses VPC subnets if null) | `list(string)` | `null` |
+| `assign_public_ip` | Assign public IP to ECS tasks | `bool` | `true` |
+
+### ECS Cluster
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `cluster_name` | ECS cluster name (defaults to `{project_name}-cluster`) | `string` | `null` |
+| `enable_container_insights` | Enable CloudWatch Container Insights | `bool` | `true` |
+
+### ECS Service
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `service_name` | ECS service name (defaults to `{project_name}-service`) | `string` | `null` |
+| `desired_count` | Number of ECS tasks (0-10) | `number` | `1` |
+
+### Container
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `container_name` | Container name | `string` | `"quine"` |
+| `container_image` | Docker image | `string` | `"thatdot/quine:latest"` |
+| `container_port` | Container port | `number` | `8080` |
+| `container_cpu` | CPU units (256-16384) | `number` | `2048` |
+| `container_memory` | Memory in MB | `number` | `4096` |
+| `container_environment` | Environment variables | `list(object)` | `[]` |
+| `container_secrets` | Secrets from SSM/Secrets Manager | `list(object)` | `[]` |
+
+### Load Balancer
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `internal_alb` | Internal ALB (not internet-facing) | `bool` | `false` |
+| `health_check_path` | Health check path | `string` | `"/api/v1/liveness"` |
+| `health_check_interval` | Health check interval (seconds) | `number` | `30` |
+| `health_check_timeout` | Health check timeout (seconds) | `number` | `5` |
+| `health_check_healthy_threshold` | Healthy threshold | `number` | `2` |
+| `health_check_unhealthy_threshold` | Unhealthy threshold | `number` | `3` |
+| `deregistration_delay` | Deregistration delay (seconds) | `number` | `30` |
+| `enable_deletion_protection` | Enable ALB deletion protection | `bool` | `false` |
+
+### HTTPS
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `enable_https` | Enable HTTPS listener | `bool` | `false` |
+| `certificate_arn` | ACM certificate ARN | `string` | `null` |
+| `ssl_policy` | SSL policy | `string` | `"ELBSecurityPolicy-TLS13-1-2-2021-06"` |
+
+### Logging
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `log_retention_days` | CloudWatch log retention (days) | `number` | `7` |
+
+### Security
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| `alb_ingress_cidr_blocks` | CIDR blocks allowed to access ALB | `list(string)` | `["0.0.0.0/0"]` |
+| `additional_task_role_policy_arns` | Additional IAM policies for task role | `list(string)` | `[]` |
+| `additional_execution_role_policy_arns` | Additional IAM policies for execution role | `list(string)` | `[]` |
+
+## Outputs
+
+### Load Balancer
+
+| Name | Description |
+|------|-------------|
+| `alb_id` | ALB ID |
+| `alb_arn` | ALB ARN |
+| `alb_dns_name` | ALB DNS name |
+| `alb_zone_id` | ALB Route53 zone ID |
+| `alb_url` | Application URL |
+| `target_group_arn` | Target group ARN |
+
+### ECS
+
+| Name | Description |
+|------|-------------|
+| `ecs_cluster_id` | ECS cluster ID |
+| `ecs_cluster_arn` | ECS cluster ARN |
+| `ecs_cluster_name` | ECS cluster name |
+| `ecs_service_id` | ECS service ID |
+| `ecs_service_name` | ECS service name |
+| `ecs_task_definition_arn` | Task definition ARN |
+| `ecs_task_definition_family` | Task definition family |
+| `ecs_task_definition_revision` | Task definition revision |
+
+### CloudWatch
+
+| Name | Description |
+|------|-------------|
+| `cloudwatch_log_group_name` | Log group name |
+| `cloudwatch_log_group_arn` | Log group ARN |
+
+### IAM
+
+| Name | Description |
+|------|-------------|
+| `ecs_task_execution_role_arn` | Execution role ARN |
+| `ecs_task_execution_role_name` | Execution role name |
+| `ecs_task_role_arn` | Task role ARN |
+| `ecs_task_role_name` | Task role name |
+
+### Security Groups
+
+| Name | Description |
+|------|-------------|
+| `alb_security_group_id` | ALB security group ID |
+| `ecs_tasks_security_group_id` | ECS tasks security group ID |
+
+### Network
+
+| Name | Description |
+|------|-------------|
+| `vpc_id` | VPC ID |
+| `subnet_ids` | Subnet IDs |
+
+## Examples
+
+### Using with Custom VPC
+
+```hcl
+module "quine" {
+  source = "thatdot/thatdot/aws"
+
+  project_name = "quine"
+  vpc_id       = module.vpc.vpc_id
+  subnet_ids   = module.vpc.public_subnets
+}
 ```
 
-Type `yes` when prompted to confirm.
+### With Environment Variables
 
-### 4. Get the Application URL
+```hcl
+module "quine" {
+  source = "thatdot/thatdot/aws"
 
-After deployment completes, the ALB URL will be displayed in the outputs:
+  project_name = "quine"
 
-```bash
-terraform output alb_url
+  container_environment = [
+    {
+      name  = "JAVA_OPTS"
+      value = "-Xms4g -Xmx6g"
+    },
+    {
+      name  = "QUINE_WEBSERVER_ADDRESS"
+      value = "0.0.0.0"
+    }
+  ]
+}
 ```
 
-Visit this URL in your browser to see the Quine UI.
+### With Secrets
 
-## Customization
+```hcl
+module "quine" {
+  source = "thatdot/thatdot/aws"
 
-To customize the deployment, copy the example tfvars file and edit as needed:
+  project_name = "quine"
 
-```bash
-cp terraform.tfvars.example terraform.tfvars
+  container_secrets = [
+    {
+      name      = "DATABASE_PASSWORD"
+      valueFrom = "arn:aws:secretsmanager:us-west-2:123456789012:secret:db-pass"
+    }
+  ]
+}
 ```
 
-See `variables.tf` for all available options.
+### With HTTPS and Route53
 
-## Cleanup
+```hcl
+module "quine" {
+  source = "thatdot/thatdot/aws"
 
-To destroy all resources created by this module:
+  project_name    = "quine"
+  enable_https    = true
+  certificate_arn = aws_acm_certificate.quine.arn
+}
 
-```bash
-terraform destroy
+resource "aws_route53_record" "quine" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "quine.example.com"
+  type    = "A"
+
+  alias {
+    name                   = module.quine.alb_dns_name
+    zone_id                = module.quine.alb_zone_id
+    evaluate_target_health = true
+  }
+}
 ```
 
-Type `yes` when prompted to confirm.
+## Upgrading
+
+### From Direct Terraform to Module
+
+If you were previously using this as a standalone Terraform configuration:
+
+1. Add provider configuration to your root module
+2. Call this as a module instead of applying directly
+3. Run `terraform state mv` commands to move resources into the module
+
+## Contributing
+
+Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) first.
+
+## License
+
+Apache 2.0 - See [LICENSE](LICENSE) for details.
+
+## Authors
+
+- Your Organization
+
+## Related Projects
+
+- [Quine](https://quine.io/) - Streaming graph for connected data
+- [thatDot](https://thatdot.com/) - Company behind Quine
