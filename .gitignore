@@ -1,0 +1,16 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+
+# tfvars may contain secrets
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# State files (shouldn't be here, but just in case)
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
