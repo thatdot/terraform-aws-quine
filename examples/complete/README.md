@@ -59,7 +59,7 @@ Note: If you enabled `enable_deletion_protection = true`, disable it first via A
 ## What Gets Created
 
 - ECS Fargate cluster with Container Insights
-- ECS service with 2 Quine containers (4 vCPU, 8 GB each)
+- ECS service running 1 Quine container (4 vCPU, 8 GB)
 - Internet-facing ALB with HTTPS
 - ACM certificate (if using automatic option)
 - Route53 alias record for custom domain

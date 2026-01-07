@@ -43,8 +43,8 @@ assign_public_ip = true
 # cluster_name = "quine-production"  # Optional: defaults to {project_name}-cluster
 # service_name = "quine-service"     # Optional: defaults to {project_name}-service
 
-# Number of task instances (increase for high availability)
-desired_count = 2
+# Number of task instances
+# desired_count = 1
 
 # Enable CloudWatch Container Insights for monitoring
 enable_container_insights = true
