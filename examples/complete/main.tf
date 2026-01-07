@@ -143,13 +143,11 @@ module "quine" {
   environment  = var.environment
 
   # Network configuration
-  # Priority: explicit subnet_ids > subnet lookup > default VPC
-  vpc_id = coalesce(
-    var.vpc_id,
+  # Priority: explicit vpc_id/subnet_ids > name lookup > default VPC (handled by module)
+  vpc_id = var.vpc_id != null ? var.vpc_id : (
     var.vpc_name != null ? data.aws_vpc.selected[0].id : null
   )
-  subnet_ids = coalesce(
-    var.subnet_ids,
+  subnet_ids = var.subnet_ids != null ? var.subnet_ids : (
     var.subnet_tag_filter != null ? data.aws_subnets.selected[0].ids : null
   )
   assign_public_ip = var.assign_public_ip
