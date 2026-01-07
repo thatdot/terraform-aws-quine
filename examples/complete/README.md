@@ -54,7 +54,7 @@ See `terraform.tfvars.example` for all available options including:
 terraform destroy
 ```
 
-Note: If `enable_deletion_protection = true` (default), disable it first via AWS Console or set to `false` and apply.
+Note: If you enabled `enable_deletion_protection = true`, disable it first via AWS Console or set to `false` and apply.
 
 ## What Gets Created
 

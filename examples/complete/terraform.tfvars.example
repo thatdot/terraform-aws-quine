@@ -91,8 +91,8 @@ container_environment = [
 internal_alb      = false  # Set true for internal-only access
 health_check_path = "/api/v1/liveness"
 
-# Enable deletion protection in production
-enable_deletion_protection = true
+# Enable deletion protection in production (disabled by default for easier iteration)
+# enable_deletion_protection = true
 
 # -----------------------------------------------------------------------------
 # HTTPS Configuration (recommended for production)
