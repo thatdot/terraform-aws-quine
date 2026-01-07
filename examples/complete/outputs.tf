@@ -4,7 +4,12 @@
 
 output "url" {
   description = "URL to access Quine web interface"
-  value       = module.quine.alb_url
+  value       = var.domain_name != null ? "https://${var.domain_name}" : module.quine.alb_url
+}
+
+output "certificate_arn" {
+  description = "ARN of the ACM certificate (created or provided)"
+  value       = local.certificate_arn
 }
 
 output "alb_dns_name" {

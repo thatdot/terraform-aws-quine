@@ -187,13 +187,13 @@ variable "enable_deletion_protection" {
 # -----------------------------------------------------------------------------
 
 variable "enable_https" {
-  description = "Enable HTTPS"
+  description = "Enable HTTPS. When enabled, requires either certificate_arn OR domain_name + hosted_zone_id"
   type        = bool
   default     = false
 }
 
 variable "certificate_arn" {
-  description = "ACM certificate ARN for HTTPS"
+  description = "ACM certificate ARN for HTTPS. If not provided and enable_https is true, a certificate will be created using domain_name"
   type        = string
   default     = null
 }
@@ -202,6 +202,18 @@ variable "ssl_policy" {
   description = "SSL policy for HTTPS"
   type        = string
   default     = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+}
+
+variable "domain_name" {
+  description = "Domain name for the Quine service (e.g., quine.example.com). Required if enable_https is true and certificate_arn is not provided"
+  type        = string
+  default     = null
+}
+
+variable "hosted_zone_id" {
+  description = "Route53 hosted zone ID where the domain is managed. Required if domain_name is provided"
+  type        = string
+  default     = null
 }
 
 # -----------------------------------------------------------------------------

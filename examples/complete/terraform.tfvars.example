@@ -97,10 +97,17 @@ enable_deletion_protection = true
 # -----------------------------------------------------------------------------
 # HTTPS Configuration (recommended for production)
 # -----------------------------------------------------------------------------
-# To enable HTTPS:
-# 1. Create an ACM certificate in the same region
-# 2. Uncomment and configure the following:
-
+# Option 1: Let Terraform create the ACM certificate and Route53 alias record
+# This is the recommended approach - just provide your domain and hosted zone ID
+#
+# enable_https   = true
+# domain_name    = "quine.example.com"
+# hosted_zone_id = "Z0123456789ABCDEFGHIJ"
+# ssl_policy     = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+#
+# Option 2: Use an existing ACM certificate
+# Use this if you already have a certificate or need more control
+#
 # enable_https    = true
 # certificate_arn = "arn:aws:acm:us-west-2:123456789012:certificate/12345678-1234-1234-1234-123456789012"
 # ssl_policy      = "ELBSecurityPolicy-TLS13-1-2-2021-06"

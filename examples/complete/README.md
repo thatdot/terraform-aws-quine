@@ -18,7 +18,8 @@ This example demonstrates a production-ready deployment of Quine on AWS ECS Farg
 
 - AWS CLI configured with appropriate credentials
 - Terraform >= 1.5.0
-- (For HTTPS) ACM certificate in the same region
+- (For HTTPS with auto-cert) Route53 hosted zone for your domain
+- (For HTTPS with existing cert) ACM certificate in the same region
 - (Optional) Custom VPC with public subnets
 
 ## Usage
@@ -79,10 +80,28 @@ subnet_tag_filter = "*-public-*"
 
 ## HTTPS Configuration
 
-To enable HTTPS:
+### Option 1: Automatic Certificate Creation (Recommended)
 
-1. Create an ACM certificate for your domain
-2. Configure the module:
+Provide your domain name and Route53 hosted zone ID, and Terraform will automatically:
+- Create an ACM certificate with DNS validation
+- Add the DNS validation records to Route53
+- Wait for certificate validation to complete
+- Create a Route53 alias record pointing to the ALB
+
+```hcl
+enable_https   = true
+domain_name    = "quine.example.com"
+hosted_zone_id = "Z0123456789ABCDEFGHIJ"
+```
+
+To find your hosted zone ID:
+```bash
+aws route53 list-hosted-zones --query "HostedZones[?Name=='example.com.'].Id" --output text
+```
+
+### Option 2: Bring Your Own Certificate
+
+If you already have an ACM certificate or need more control:
 
 ```hcl
 enable_https    = true
@@ -90,7 +109,7 @@ certificate_arn = "arn:aws:acm:us-west-2:123456789012:certificate/..."
 ssl_policy      = "ELBSecurityPolicy-TLS13-1-2-2021-06"
 ```
 
-3. (Optional) Create a Route53 alias record pointing to the ALB
+Note: With this option, you'll need to manually create a DNS record pointing to the ALB
 
 ## Secrets Management
 
@@ -127,7 +146,8 @@ See `variables.tf` for the complete list of available inputs.
 
 | Name | Description |
 |------|-------------|
-| url | URL to access Quine |
+| url | URL to access Quine (custom domain if configured, otherwise ALB URL) |
+| certificate_arn | ARN of the ACM certificate (created or provided) |
 | alb_dns_name | ALB DNS name |
 | alb_zone_id | ALB Route53 zone ID (for alias records) |
 | ecs_cluster_name | ECS cluster name |
