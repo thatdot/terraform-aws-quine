@@ -54,7 +54,7 @@ variable "subnet_ids" {
   default     = null
 
   validation {
-    condition     = var.subnet_ids == null || (length(var.subnet_ids) >= 2 && alltrue([for s in var.subnet_ids : can(regex("^subnet-[a-f0-9]{8,17}$", s))]))
+    condition     = var.subnet_ids == null ? true : (length(var.subnet_ids) >= 2 && alltrue([for s in var.subnet_ids : can(regex("^subnet-[a-f0-9]{8,17}$", s))]))
     error_message = "Subnet IDs must be valid AWS subnet IDs and at least 2 subnets are required for the ALB."
   }
 }
