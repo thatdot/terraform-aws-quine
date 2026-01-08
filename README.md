@@ -1,6 +1,6 @@
-# Terraform AWS thatDot Module
+# Terraform AWS Quine Module
 
-[![Terraform Registry](https://img.shields.io/badge/terraform-registry-blue.svg)](https://registry.terraform.io/modules/thatdot/thatdot/aws)
+[![Terraform Registry](https://img.shields.io/badge/terraform-registry-blue.svg)](https://registry.terraform.io/modules/thatdot/quine/aws)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 Terraform module to deploy [Quine](https://quine.io/) streaming graph on AWS ECS Fargate with an Application Load Balancer.
@@ -50,7 +50,7 @@ Terraform module to deploy [Quine](https://quine.io/) streaming graph on AWS ECS
 
 ```hcl
 module "quine" {
-  source  = "thatdot/thatdot/aws"
+  source  = "thatdot/quine/aws"
   version = "1.0.0"
 
   project_name = "my-quine"
@@ -65,7 +65,7 @@ output "url" {
 
 ```hcl
 module "quine" {
-  source  = "thatdot/thatdot/aws"
+  source  = "thatdot/quine/aws"
   version = "1.0.0"
 
   project_name = "quine-prod"
@@ -260,7 +260,7 @@ See the [examples](./examples/) directory for complete usage examples:
 
 ```hcl
 module "quine" {
-  source = "thatdot/thatdot/aws"
+  source = "thatdot/quine/aws"
 
   project_name = "quine"
   vpc_id       = module.vpc.vpc_id
@@ -272,7 +272,7 @@ module "quine" {
 
 ```hcl
 module "quine" {
-  source = "thatdot/thatdot/aws"
+  source = "thatdot/quine/aws"
 
   project_name = "quine"
 
@@ -293,7 +293,7 @@ module "quine" {
 
 ```hcl
 module "quine" {
-  source = "thatdot/thatdot/aws"
+  source = "thatdot/quine/aws"
 
   project_name = "quine"
 
@@ -310,7 +310,7 @@ module "quine" {
 
 ```hcl
 module "quine" {
-  source = "thatdot/thatdot/aws"
+  source = "thatdot/quine/aws"
 
   project_name    = "quine"
   enable_https    = true
