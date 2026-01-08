@@ -26,7 +26,7 @@ terraform {
 # Configure the AWS provider
 # The module consumer is responsible for provider configuration
 provider "aws" {
-  region = "us-west-2"
+  region = var.aws_region
 
   default_tags {
     tags = {
