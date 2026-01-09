@@ -167,7 +167,7 @@ variable "internal_alb" {
 variable "health_check_path" {
   description = "Health check path"
   type        = string
-  default     = "/api/v1/liveness"
+  default     = "/api/v1/admin/liveness"
 }
 
 variable "health_check_interval" {
