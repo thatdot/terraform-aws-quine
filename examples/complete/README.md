@@ -39,7 +39,7 @@ terraform apply
 See `terraform.tfvars.example` for all available options including:
 - Custom VPC and subnet configuration
 - Container CPU/memory allocation
-- Environment variables and secrets
+- Environment variables
 - ALB access restrictions
 
 ## HTTPS Options

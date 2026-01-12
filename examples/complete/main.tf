@@ -5,7 +5,7 @@
 # - Custom VPC and subnets
 # - HTTPS with ACM certificate
 # - Custom container configuration
-# - Environment variables and secrets
+# - Environment variables
 # - Multiple task instances for high availability
 #
 # Usage:
@@ -168,9 +168,6 @@ module "quine" {
 
   # Environment variables
   container_environment = var.container_environment
-
-  # Secrets (from SSM Parameter Store or Secrets Manager)
-  container_secrets = var.container_secrets
 
   # Load balancer configuration
   internal_alb               = var.internal_alb

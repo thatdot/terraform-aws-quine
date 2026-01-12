@@ -169,15 +169,6 @@ variable "container_environment" {
   default = []
 }
 
-variable "container_secrets" {
-  description = "Secrets to pass to the container from AWS Secrets Manager or SSM Parameter Store."
-  type = list(object({
-    name      = string
-    valueFrom = string
-  }))
-  default = []
-}
-
 # -----------------------------------------------------------------------------
 # Load Balancer Configuration
 # -----------------------------------------------------------------------------

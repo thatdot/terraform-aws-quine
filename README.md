@@ -14,7 +14,6 @@ Terraform module to deploy [Quine](https://quine.io/) streaming graph on AWS ECS
 - **CloudWatch Integration** - Container logs with configurable retention
 - **Container Insights** - Optional detailed container metrics
 - **IAM Least Privilege** - Separate execution and task roles with minimal permissions
-- **Secrets Management** - Native integration with AWS Secrets Manager and SSM Parameter Store
 - **Production Ready** - Deployment circuit breaker, deletion protection, and proper tagging
 
 ## Architecture
@@ -159,7 +158,6 @@ See the [examples](./examples/) directory for complete usage examples:
 | `container_cpu`         | CPU units (256-16384)            | `number`       | `2048`                   |
 | `container_memory`      | Memory in MB                     | `number`       | `4096`                   |
 | `container_environment` | Environment variables            | `list(object)` | `[]`                     |
-| `container_secrets`     | Secrets from SSM/Secrets Manager | `list(object)` | `[]`                     |
 
 ### Load Balancer
 
@@ -282,23 +280,6 @@ module "quine" {
     {
       name  = "QUINE_WEBSERVER_ADDRESS"
       value = "0.0.0.0"
-    }
-  ]
-}
-```
-
-### With Secrets
-
-```hcl
-module "quine" {
-  source = "thatdot/quine/aws"
-
-  project_name = "quine"
-
-  container_secrets = [
-    {
-      name      = "DATABASE_PASSWORD"
-      valueFrom = "arn:aws:secretsmanager:us-west-2:123456789012:secret:db-pass"
     }
   ]
 }

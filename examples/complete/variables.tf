@@ -139,15 +139,6 @@ variable "container_environment" {
   default = []
 }
 
-variable "container_secrets" {
-  description = "Secrets from SSM/Secrets Manager"
-  type = list(object({
-    name      = string
-    valueFrom = string
-  }))
-  default = []
-}
-
 # -----------------------------------------------------------------------------
 # Load Balancer Configuration
 # -----------------------------------------------------------------------------

@@ -85,8 +85,6 @@ resource "aws_ecs_task_definition" "main" {
 
       environment = local.container_environment
 
-      secrets = length(var.container_secrets) > 0 ? var.container_secrets : null
-
       healthCheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:${var.container_port}${var.health_check_path} || exit 1"]
         interval    = 30

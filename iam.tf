@@ -12,7 +12,6 @@
 # This role grants ECS the permissions to:
 # - Pull container images from ECR
 # - Write logs to CloudWatch
-# - Retrieve secrets from Secrets Manager or SSM Parameter Store
 
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "${var.project_name}-ecs-execution-role"
@@ -50,41 +49,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_additional" {
 
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = each.value
-}
-
-# Policy for accessing secrets (only if secrets are configured)
-resource "aws_iam_role_policy" "ecs_task_execution_secrets" {
-  count = length(var.container_secrets) > 0 ? 1 : 0
-
-  name = "${var.project_name}-ecs-execution-secrets"
-  role = aws_iam_role.ecs_task_execution_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue",
-          "ssm:GetParameters",
-          "ssm:GetParameter"
-        ]
-        Resource = [for secret in var.container_secrets : secret.valueFrom]
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "kms:Decrypt"
-        ]
-        Resource = "*"
-        Condition = {
-          StringEquals = {
-            "kms:ViaService" = "secretsmanager.${local.aws_region}.amazonaws.com"
-          }
-        }
-      }
-    ]
-  })
 }
 
 # -----------------------------------------------------------------------------

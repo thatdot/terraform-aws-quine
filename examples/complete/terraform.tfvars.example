@@ -70,18 +70,6 @@ container_environment = [
   }
 ]
 
-# Secrets from AWS Secrets Manager or SSM Parameter Store (optional)
-# container_secrets = [
-#   {
-#     name      = "DATABASE_PASSWORD"
-#     valueFrom = "arn:aws:secretsmanager:us-west-2:123456789012:secret:prod/quine/db-password"
-#   },
-#   {
-#     name      = "API_KEY"
-#     valueFrom = "arn:aws:ssm:us-west-2:123456789012:parameter/prod/quine/api-key"
-#   }
-# ]
-
 # -----------------------------------------------------------------------------
 # Load Balancer Configuration
 # -----------------------------------------------------------------------------
