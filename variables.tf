@@ -101,17 +101,6 @@ variable "service_name" {
   }
 }
 
-variable "desired_count" {
-  description = "Desired number of ECS tasks to run."
-  type        = number
-  default     = 1
-
-  validation {
-    condition     = var.desired_count >= 0 && var.desired_count <= 10
-    error_message = "Desired count must be between 0 and 10."
-  }
-}
-
 # -----------------------------------------------------------------------------
 # Container Configuration
 # -----------------------------------------------------------------------------

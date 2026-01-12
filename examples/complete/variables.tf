@@ -96,12 +96,6 @@ variable "service_name" {
   default     = null
 }
 
-variable "desired_count" {
-  description = "Number of ECS tasks"
-  type        = number
-  default     = 1
-}
-
 # -----------------------------------------------------------------------------
 # Container Configuration
 # -----------------------------------------------------------------------------

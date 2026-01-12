@@ -157,8 +157,7 @@ module "quine" {
   enable_container_insights = var.enable_container_insights
 
   # ECS service configuration
-  service_name  = var.service_name
-  desired_count = var.desired_count
+  service_name = var.service_name
 
   # Container configuration
   container_name   = var.container_name

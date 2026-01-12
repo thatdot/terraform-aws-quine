@@ -110,7 +110,7 @@ resource "aws_ecs_service" "main" {
   name            = local.service_name
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
-  desired_count   = var.desired_count
+  desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
@@ -151,10 +151,4 @@ resource "aws_ecs_service" "main" {
     }
   )
 
-  lifecycle {
-    ignore_changes = [
-      # Allow external changes to desired_count for auto-scaling
-      desired_count
-    ]
-  }
 }

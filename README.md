@@ -78,7 +78,6 @@ module "quine" {
   # Container sizing
   container_cpu    = 4096
   container_memory = 8192
-  desired_count    = 2
 
   # HTTPS
   enable_https    = true
@@ -146,10 +145,9 @@ See the [examples](./examples/) directory for complete usage examples:
 
 ### ECS Service
 
-| Name            | Description                                             | Type     | Default |
-| --------------- | ------------------------------------------------------- | -------- | ------- |
-| `service_name`  | ECS service name (defaults to `{project_name}-service`) | `string` | `null`  |
-| `desired_count` | Number of ECS tasks (0-10)                              | `number` | `1`     |
+| Name           | Description                                             | Type     | Default |
+| -------------- | ------------------------------------------------------- | -------- | ------- |
+| `service_name` | ECS service name (defaults to `{project_name}-service`) | `string` | `null`  |
 
 ### Container
 
