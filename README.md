@@ -157,7 +157,6 @@ See the [examples](./examples/) directory for complete usage examples:
 | `container_port`        | Container port                   | `number`       | `8080`                   |
 | `container_cpu`         | CPU units (256-16384)            | `number`       | `2048`                   |
 | `container_memory`      | Memory in MB                     | `number`       | `4096`                   |
-| `container_environment` | Environment variables            | `list(object)` | `[]`                     |
 
 ### Load Balancer
 
@@ -261,27 +260,6 @@ module "quine" {
   project_name = "quine"
   vpc_id       = module.vpc.vpc_id
   subnet_ids   = module.vpc.public_subnets
-}
-```
-
-### With Environment Variables
-
-```hcl
-module "quine" {
-  source = "thatdot/quine/aws"
-
-  project_name = "quine"
-
-  container_environment = [
-    {
-      name  = "JAVA_OPTS"
-      value = "-Xms4g -Xmx6g"
-    },
-    {
-      name  = "QUINE_WEBSERVER_ADDRESS"
-      value = "0.0.0.0"
-    }
-  ]
 }
 ```
 

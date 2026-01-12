@@ -160,15 +160,6 @@ variable "container_memory" {
   }
 }
 
-variable "container_environment" {
-  description = "Environment variables to pass to the container."
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
-
 # -----------------------------------------------------------------------------
 # Load Balancer Configuration
 # -----------------------------------------------------------------------------

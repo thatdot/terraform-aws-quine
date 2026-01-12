@@ -130,15 +130,6 @@ variable "container_memory" {
   default     = 8192
 }
 
-variable "container_environment" {
-  description = "Environment variables"
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  default = []
-}
-
 # -----------------------------------------------------------------------------
 # Load Balancer Configuration
 # -----------------------------------------------------------------------------

@@ -5,7 +5,6 @@
 # - Custom VPC and subnets
 # - HTTPS with ACM certificate
 # - Custom container configuration
-# - Environment variables
 # - Multiple task instances for high availability
 #
 # Usage:
@@ -165,9 +164,6 @@ module "quine" {
   container_port   = var.container_port
   container_cpu    = var.container_cpu
   container_memory = var.container_memory
-
-  # Environment variables
-  container_environment = var.container_environment
 
   # Load balancer configuration
   internal_alb               = var.internal_alb
