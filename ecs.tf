@@ -127,9 +127,10 @@ resource "aws_ecs_service" "main" {
     container_port   = var.container_port
   }
 
-  # Ensure the ALB listener is created before the service
+  # The service and policy attachment are siblings (both depend on the IAM role),
+  # so Terraform sees no implicit dependency between them. Without this, Terraform
+  # could create them in parallel, causing task startup failures due to missing permissions.
   depends_on = [
-    aws_lb_listener.http,
     aws_iam_role_policy_attachment.ecs_task_execution_role_policy
   ]
 
