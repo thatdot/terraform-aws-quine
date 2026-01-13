@@ -1,24 +1,50 @@
+# -----------------------------------------------------------------------------
+# ECS Resources
+# -----------------------------------------------------------------------------
+# This file defines the ECS cluster, task definition, and service.
+# Uses AWS Fargate for serverless container execution.
+# -----------------------------------------------------------------------------
+
 # CloudWatch Log Group for ECS
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.project_name}"
-  retention_in_days = 7
+  retention_in_days = var.log_retention_days
 
-  tags = {
-    Name = "${var.project_name}-logs"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project_name}-logs"
+    }
+  )
 }
 
 # ECS Cluster
 resource "aws_ecs_cluster" "main" {
-  name = var.cluster_name
+  name = local.cluster_name
 
   setting {
     name  = "containerInsights"
-    value = "enabled"
+    value = var.enable_container_insights ? "enabled" : "disabled"
   }
 
-  tags = {
-    Name = var.cluster_name
+  tags = merge(
+    local.common_tags,
+    {
+      Name = local.cluster_name
+    }
+  )
+}
+
+# ECS Cluster Capacity Providers
+resource "aws_ecs_cluster_capacity_providers" "main" {
+  cluster_name = aws_ecs_cluster.main.name
+
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+
+  default_capacity_provider_strategy {
+    base              = 1
+    weight            = 100
+    capacity_provider = "FARGATE"
   }
 }
 
@@ -52,37 +78,47 @@ resource "aws_ecs_task_definition" "main" {
         logDriver = "awslogs"
         options = {
           "awslogs-group"         = aws_cloudwatch_log_group.ecs.name
-          "awslogs-region"        = var.aws_region
+          "awslogs-region"        = local.aws_region
           "awslogs-stream-prefix" = "ecs"
         }
       }
 
-      environment = [
-        {
-          name  = "ENVIRONMENT"
-          value = var.environment
-        }
-      ]
+      healthCheck = {
+        command     = ["CMD-SHELL", "curl -f http://localhost:${var.container_port}${var.health_check_path} || exit 1"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
+        startPeriod = 60
+      }
     }
   ])
 
-  tags = {
-    Name = "${var.project_name}-task"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project_name}-task"
+    }
+  )
 }
 
 # ECS Service
 resource "aws_ecs_service" "main" {
-  name            = var.service_name
+  name            = local.service_name
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
-  desired_count   = var.desired_count
-  launch_type     = "FARGATE"
+  desired_count   = 1
+
+  # Use capacity provider strategy instead of launch_type to enable FARGATE_SPOT support
+  capacity_provider_strategy {
+    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+    weight            = 100
+    base              = 1
+  }
 
   network_configuration {
-    subnets          = data.aws_subnets.default.ids
+    subnets          = local.subnet_ids
     security_groups  = [aws_security_group.ecs_tasks.id]
-    assign_public_ip = true
+    assign_public_ip = var.assign_public_ip
   }
 
   load_balancer {
@@ -91,12 +127,31 @@ resource "aws_ecs_service" "main" {
     container_port   = var.container_port
   }
 
+  # Terraform infers dependencies from references, but nothing references the policy
+  # attachment - only the role itself. Without this explicit dependency, Terraform may
+  # create the service before the policy is attached, causing task startup failures.
   depends_on = [
-    aws_lb_listener.main,
     aws_iam_role_policy_attachment.ecs_task_execution_role_policy
   ]
 
-  tags = {
-    Name = var.service_name
+  # Enable deployment circuit breaker for safer deployments
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
   }
+
+  # Deployment configuration
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+
+  # Propagate tags to tasks
+  propagate_tags = "SERVICE"
+
+  tags = merge(
+    local.common_tags,
+    {
+      Name = local.service_name
+    }
+  )
+
 }
