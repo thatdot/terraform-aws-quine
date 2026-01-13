@@ -43,9 +43,6 @@ module "quine" {
   # Required: Project name for resource naming
   project_name = "quine-basic"
 
-  # Optional: Environment tag (defaults to "dev")
-  environment = "dev"
-
   # All other values use sensible defaults:
   # - Uses default VPC and subnets
   # - 2048 CPU units (2 vCPU)
