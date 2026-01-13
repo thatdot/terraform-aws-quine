@@ -127,9 +127,9 @@ resource "aws_ecs_service" "main" {
     container_port   = var.container_port
   }
 
-  # The service and policy attachment are siblings (both depend on the IAM role),
-  # so Terraform sees no implicit dependency between them. Without this, Terraform
-  # could create them in parallel, causing task startup failures due to missing permissions.
+  # Terraform infers dependencies from references, but nothing references the policy
+  # attachment - only the role itself. Without this explicit dependency, Terraform may
+  # create the service before the policy is attached, causing task startup failures.
   depends_on = [
     aws_iam_role_policy_attachment.ecs_task_execution_role_policy
   ]
