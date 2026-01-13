@@ -101,6 +101,12 @@ variable "service_name" {
   }
 }
 
+variable "use_fargate_spot" {
+  description = "Use FARGATE_SPOT capacity provider for cost savings. Spot instances can be interrupted with 2 minutes notice. Defaults to false for reliability."
+  type        = bool
+  default     = false
+}
+
 # -----------------------------------------------------------------------------
 # Container Configuration
 # -----------------------------------------------------------------------------

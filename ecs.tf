@@ -107,7 +107,13 @@ resource "aws_ecs_service" "main" {
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.main.arn
   desired_count   = 1
-  launch_type     = "FARGATE"
+
+  # Use capacity provider strategy instead of launch_type to enable FARGATE_SPOT support
+  capacity_provider_strategy {
+    capacity_provider = var.use_fargate_spot ? "FARGATE_SPOT" : "FARGATE"
+    weight            = 100
+    base              = 1
+  }
 
   network_configuration {
     subnets          = local.subnet_ids
